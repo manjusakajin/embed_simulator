@@ -6,7 +6,7 @@ class Compile():
     self.err = []
   def setSrc(self, srcCode=None):
     self.src = self.cutSrc(srcCode)
-    print(self.src)
+    self.current_index = 0
 
   def cutSrc(self, srcCode=None):
     if srcCode != None:
@@ -95,7 +95,10 @@ class Compile():
         while(i<len(command) and command[i].isdigit()):
           i+=1
         status = i
-        tokens.append({'type': 'number', 'value': float(command[0:i-1])})
+        if i == 1:
+          tokens.append({'type': 'number', 'value': int(command[0])})
+        else :
+          tokens.append({'type': 'number', 'value': int(command[0:i-1])})
       else:
         i = 0
         while(i<len(command) and (command[i].isalpha() or command[i].isdigit())):
@@ -103,34 +106,62 @@ class Compile():
         status = i
         token = command[0:i]
         if token in var.keyword:
-          tokens.append({'type': 'keyword', 'value': var.keyword[token] })
+          tokens.append({'type': 'keyword_'+ token, 'value': var.keyword[token] })
         else:
           tokens.append({'type': 'indent', 'value': command[0:i]})
       non_cut = command
       command = non_cut[status:len(non_cut)]
-      print(command)
     return tokens
 
-  def check_syntax(self, tokens):
-    stack = []
-    x=0
-    while x < len(tokens):
-      stack.append(tokens[x])
-      combine = -1
-      while combine != 0 :
-        combine = 0
-        for y in range(stack):
-          if check_case(stack[y:]) != None:
-            stack = stack[0:y-1] + check_case(stack[y:])
-            combine +=1
-            break
-      x+=1
-    return stack
-
-  def check(self, case):
-    if case[0]['type'] == 'ident':
-      if case[1]['type'] == 'sb_eq':
-        x = check_expression(case[2:])
-      if case[1]['type'] == 'sb_listopen':
-        x = 
-    return x
+  def check_syntax(self):
+    content = []
+    while self.src[self.current_index] != []:
+      command_lines.append(self.check_command())
+  def check_command(self):
+    content = []
+    if self.current_syntax[0]['type'] == 'keyword_if':
+  def check_expression(self):
+    content = []
+    content.append(self.check_math_ex())
+    while self.current_index < len(self.src) and (self.src[self.current_index]['type'] == 'keyword_and' or self.src[self.current_index]['type'] == 'keyword_or'):
+      content.append(self.src[self.current_index])
+      self.current_index += 1
+      content.append(self.check_math_ex())
+    return {'type': 'expression', 'value': content}
+  def check_math_ex(self):
+    content = []
+    content.append(self.check_term())
+    while self.current_index < len(self.src) and (self.src[self.current_index]['type'] == 'sb_plus' or self.src[self.current_index]['type'] == 'sb_minus') :
+      content.append(self.src[self.current_index])
+      self.current_index += 1
+      content.append(self.check_term())
+    for x in content:
+      print(x)
+    return {'type': 'math_expression', 'value': content}
+  def check_term(self):
+    content = []
+    content.append(self.check_operand())
+    while self.current_index < len(self.src) and (self.src[self.current_index]['type'] == 'sb_time' or self.src[self.current_index]['type'] == 'sb_slash'):
+      print(self.src[self.current_index])
+      content.append(self.src[self.current_index])
+      self.current_index += 1
+      content.append(self.check_operand())
+    return {'type': 'term', 'value': content}
+  def check_operand(self):
+    type = ['indent', 'number', 'expression']
+    if self.src[self.current_index]['type'] in type :
+      self.current_index += 1
+      return self.src[self.current_index-1]
+    elif self.current_index < len(self.src) and self.src[self.current_index]['type'] == 'sb_exopen':
+      self.current_index += 1
+      self.check_expression()
+      if self.current_index < len(self.src) and self.src[self.current_index]['type'] == 'sb_exclose':
+        self.current_index += 1
+      else :
+        self.err.append('Not close )')
+    else:
+      self.err.append('There must operand')
+compile = Compile()
+src = " a+b*c/d and 6"
+compile.setSrc(src)
+compile.check_expression()

@@ -27,17 +27,18 @@ class Application(tk.Frame):
       self.setup_env = SetupENV(self.sub_frame3)
       self.setup_agent = SetupAgent(self.sub_frame4, self.turtle_screen)
       self.setup_algorithm = al.Algorithm(self.sub_frame2)
-      self.control = Controlmodule(self.setup_env, self.setup_agent, self.turtle_screen)
+      # self.setup_association = SetupAssociation(self.sub_frame3, self.setup_agent)
+      self.control = Controlmodule(self.setup_env, self.setup_agent, self.setup_algorithm ,self.turtle_screen)
 
     def agents_update(self):
       print("callback")
-      self.setup_association.add_agenttype()
+      # self.setup_association.add_agenttype()
     def create_widgets(self):
     #############################simulation frame #################################
       self.current_frame = self.sub_frame1
       if self.control:
         tk.Button(self.sub_frame1, text="Setup", command=self.control.setup).place(x=50, y=50)
-        tk.Button(self.sub_frame1, text="Run", command=self.control.run).place(x=50, y=150)
+        # tk.Button(self.sub_frame1, text="Run", command=self.control.run).place(x=50, y=150)
       self.sub_frame1.pack()
  ##################################setup code frame################################
       # self.sub_frame2 = tk.Frame(self.master, width=1000, height=550, borderwidth=5, relief="groove")
@@ -54,7 +55,7 @@ class Application(tk.Frame):
       self.code_button = tk.Button(self, text="Agent", command=self.display_a_frame)
       self.code_button.pack(side="left")
 
-      self.code_button = tk.Button(self, text="Association", command=self.display_l_frame)
+      self.code_button = tk.Button(self, text="Algorithm", command=self.display_l_frame)
       self.code_button.pack(side="left")
       # self.code_button = tk.Button(self, text="Code", command=self.display_c_frame)
       # self.code_button.pack(side="left")

@@ -6,16 +6,16 @@ from tkinter import ttk
 from tkinter.filedialog import Open
 from PIL import Image, ImageTk
 from turtle import *
-from behavior import *
+# from behavior import *
 import variable as var
 
 class SetupAgent():
   def __init__(self, master=None, screen=None):
     self._currenttype = None
-    self.custom_behavior = None
+    # self.custom_behavior = None
     self._screen = screen
     self._master = master
-    self.behavior = "randomRun"
+    # self.behavior = "randomRun"
     self.agents = ["New Agent"]
     self.initUI(master)
   def initUI(self, frame):
@@ -72,10 +72,10 @@ class SetupAgent():
     self._subframe.shape_height = Entry(self._subframe, width = 10)
     self._subframe.shape_height.insert(0,"height")
     #############################Behavior Input############################
-    self._subframe.behavior_label = Label(self._subframe, text="Behavior:")
-    self._subframe.behavior_box = ttk.Combobox(self._subframe, values=Behavior.methods)
-    self._subframe.behavior_box.bind("<<ComboboxSelected>>", self.selectbehavior)
-    self._subframe.behavior_button = Button(self._subframe, text="Create New Method", command=self.create_custom_behavior)
+    # self._subframe.behavior_label = Label(self._subframe, text="Behavior:")
+    # self._subframe.behavior_box = ttk.Combobox(self._subframe, values=Behavior.methods)
+    # self._subframe.behavior_box.bind("<<ComboboxSelected>>", self.selectbehavior)
+    # self._subframe.behavior_button = Button(self._subframe, text="Create New Method", command=self.create_custom_behavior)
     ############################# Begin Position ##########################
     self._subframe.begin_pos_label = Label(self._subframe, text="Begin Postition:")
     self._subframe.begin_pos_x = Entry(self._subframe, width = 10)
@@ -126,14 +126,14 @@ class SetupAgent():
     if object.type == "Display" :
       self.createDisplayAgentForm()
       self._subframe.shape_box.set(object.shape)
-      self._subframe.behavior_box.set(object.behavior)
+      # self._subframe.behavior_box.set(object.behavior)
       self._subframe.begin_pos_x.delete(0, "end")
       self._subframe.begin_pos_x.insert(0, object.x)
       self._subframe.begin_pos_y.delete(0, "end")
       self._subframe.begin_pos_y.insert(0, object.y)
       self._subframe.begin_heading.delete(0, "end")
       self._subframe.begin_heading.insert(0, object.heading)
-      self.custom_behavior = object.custom_behavior
+      # self.custom_behavior = object.custom_behavior
     elif object.type == "Active" :
       self.showActiveAgentForm()
       self.active_list.delete(0, "end")
@@ -155,17 +155,17 @@ class SetupAgent():
     type = self._subframe.type_input.get()
     if type == "Display":
       shape = self._subframe.shape_box.get()
-      behavior = self._subframe.behavior_box.get()
-      custom_behavior = self.custom_behavior
+      # behavior = self._subframe.behavior_box.get()
+      # custom_behavior = self.custom_behavior
       x = self._subframe.begin_pos_x.get()
       y = self._subframe.begin_pos_y.get()
       heading = self._subframe.begin_heading.get()
       if name in self._list.get(0, len(self.agents)-1):
         for i in self.agents:
           if i!= "New Agent" and name == i.name  :
-            i.update(name, shape, behavior, custom_behavior, x, y,heading)
+            i.update(name, shape, x, y,heading)
       else:
-        new = DisplayAgent(name, shape, behavior, custom_behavior, x, y,heading)
+        new = DisplayAgent(name, shape, x, y,heading)
         self.agents.append(new)
         self._list.insert("end", new.name)
     elif type == "Active":
@@ -199,9 +199,9 @@ class SetupAgent():
     shape_name = self._subframe.shape_box.get()
     shape_index = self._subframe.shape_box.current()
     if shape_name == "New Shape":
-      self._subframe.behavior_label.place(x=50, y=330)
-      self._subframe.behavior_box.place(x=150, y=330)
-      self._subframe.behavior_button.place(x=350, y=330)
+      # self._subframe.behavior_label.place(x=50, y=330)
+      # self._subframe.behavior_box.place(x=150, y=330)
+      # self._subframe.behavior_button.place(x=350, y=330)
       self._subframe.begin_pos_label.place(x=50, y=380 )
       self._subframe.begin_pos_x.place(x=150, y=380)
       self._subframe.begin_pos_y.place(x=250, y=380)
@@ -244,8 +244,8 @@ class SetupAgent():
       self._subframe.shape_height.insert(0,"height")
       self._subframe.shape_box.configure(values = shapes)
       print(self._screen.getshapes())
-  def selectbehavior(self, event):
-    self.behavior = self._subframe.behavior_box.get()
+  # def selectbehavior(self, event):
+  #   self.behavior = self._subframe.behavior_box.get()
   def selectType(self, event):
     type = self._subframe.type_input.get()
     if type == "Display":
@@ -260,9 +260,9 @@ class SetupAgent():
   def createDisplayAgentForm(self):
     self._subframe.shape_label.place(x=50, y=160)
     self._subframe.shape_box.place(x=150, y=160)
-    self._subframe.behavior_box.place(x=150, y=200)
-    self._subframe.behavior_label.place(x=50, y=200)
-    self._subframe.behavior_button.place(x=350,y=200)
+    # self._subframe.behavior_box.place(x=150, y=200)
+    # self._subframe.behavior_label.place(x=50, y=200)
+    # self._subframe.behavior_button.place(x=350,y=200)
     self._subframe.begin_pos_label.place(x=50, y=250 )
     self._subframe.begin_pos_x.place(x=150, y=250)
     self._subframe.begin_pos_y.place(x=250, y=250)
@@ -271,9 +271,9 @@ class SetupAgent():
   def hideForm(self):
     self._subframe.shape_label.place_forget()
     self._subframe.shape_box.place_forget()
-    self._subframe.behavior_box.place_forget()
-    self._subframe.behavior_label.place_forget()
-    self._subframe.behavior_button.place_forget()
+    # self._subframe.behavior_box.place_forget()
+    # self._subframe.behavior_label.place_forget()
+    # self._subframe.behavior_button.place_forget()
     self._subframe.begin_pos_label.place_forget()
     self._subframe.begin_pos_x.place_forget()
     self._subframe.begin_pos_y.place_forget()
@@ -298,19 +298,19 @@ class SetupAgent():
     except:
         return False
 
-  def create_custom_behavior(self):
-    top = Toplevel()
-    top.title("Create Custom Behavior")
-    text_box = Text(top, height = 20, width =60)
-    if self.custom_behavior != None :
-      text_box.insert("end", self.custom_behavior)
-    text_box.pack()
-    Button(top, text= "Save", command= lambda: self.save_custom_behavior(text_box.get("1.0","end"), top)).pack()
+  # def create_custom_behavior(self):
+  #   top = Toplevel()
+  #   top.title("Create Custom Behavior")
+  #   text_box = Text(top, height = 20, width =60)
+  #   if self.custom_behavior != None :
+  #     text_box.insert("end", self.custom_behavior)
+  #   text_box.pack()
+  #   Button(top, text= "Save", command= lambda: self.save_custom_behavior(text_box.get("1.0","end"), top)).pack()
 
-  def save_custom_behavior(self, code, toplevel):
-    self.custom_behavior = code
-    print(code)
-    toplevel.destroy()
+  # def save_custom_behavior(self, code, toplevel):
+  #   self.custom_behavior = code
+  #   print(code)
+  #   toplevel.destroy()
   def select_method(self,event):
     selected = self.active_list.curselection()
     if selected :

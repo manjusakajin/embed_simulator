@@ -5,7 +5,6 @@ import algorithm as al
 from simulation_frame import *
 from setup_env import *
 from setup_agent import *
-from setup_association import *
 from control import *
 
 class Application(tk.Frame):
@@ -23,23 +22,20 @@ class Application(tk.Frame):
       self.sub_frame2 = tk.Frame(self.master, width=1000, height=550, borderwidth=5, relief="groove")
 
       self.simulation_module = SimulationModule(self.sub_frame1)
-      self.turtle_screen = self.simulation_module.turtle_screen
-      self.setup_env = SetupENV(self.sub_frame3)
-      self.setup_agent = SetupAgent(self.sub_frame4, self.turtle_screen)
-      self.setup_algorithm = al.Algorithm(self.sub_frame2)
+      self.sub_frame1.pack(fill="both", expand=True)
+      self.current_frame = self.sub_frame1
+      # self.turtle_screen = self.simulation_module.turtle_screen
+      # self.setup_env = SetupENV(self.sub_frame3)
+      self.setup_agent = SetupAgent(self.sub_frame4)
+      self.setup_algorithm = al.Algorithm(self.sub_frame2, self.setup_agent)
       # self.setup_association = SetupAssociation(self.sub_frame3, self.setup_agent)
-      self.control = Controlmodule(self.setup_env, self.setup_agent, self.setup_algorithm ,self.turtle_screen)
+      self.control = Controlmodule(self.simulation_module, self.setup_agent, self.setup_algorithm )
 
-    def agents_update(self):
-      print("callback")
-      # self.setup_association.add_agenttype()
     def create_widgets(self):
     #############################simulation frame #################################
-      self.current_frame = self.sub_frame1
-      if self.control:
-        tk.Button(self.sub_frame1, text="Setup", command=self.control.setup).place(x=50, y=50)
+      # if self.control:
+      #   tk.Button(self.sub_frame1, text="Setup", command=self.control.setup).place(x=50, y=50)
         # tk.Button(self.sub_frame1, text="Run", command=self.control.run).place(x=50, y=150)
-      self.sub_frame1.pack()
  ##################################setup code frame################################
       # self.sub_frame2 = tk.Frame(self.master, width=1000, height=550, borderwidth=5, relief="groove")
       # self.create_code_frame()
@@ -49,8 +45,8 @@ class Application(tk.Frame):
       self.interface_button = tk.Button(self, text="Simulation", command=self.display_s_frame)
       self.interface_button.pack(side="left")
 
-      self.code_button = tk.Button(self, text="Enviroment", command=self.display_e_frame)
-      self.code_button.pack(side="left")
+      # self.code_button = tk.Button(self, text="Enviroment", command=self.display_e_frame)
+      # self.code_button.pack(side="left")
 
       self.code_button = tk.Button(self, text="Agent", command=self.display_a_frame)
       self.code_button.pack(side="left")
@@ -59,7 +55,9 @@ class Application(tk.Frame):
       self.code_button.pack(side="left")
       # self.code_button = tk.Button(self, text="Code", command=self.display_c_frame)
       # self.code_button.pack(side="left")
-
+      tk.Button(self.sub_frame1, text="Setup", command= self.control.setup).pack(side="left")
+      tk.Button(self.sub_frame1, text="Run", command= self.control.run).pack(side="left")
+      tk.Button(self.sub_frame1, text="Run Loop", command= self.control.run_loop).pack(side="left")
 
     def create_code_frame(self):
       self.read_code = tk.Button(self.sub_frame2, text="read", command=self.get_code)
@@ -70,17 +68,19 @@ class Application(tk.Frame):
     def display_s_frame(self):
       self.current_frame.pack_forget()
       self.sub_frame1.pack(fill="both", expand=True)
+      print(self.simulation_module.turtle_screen.getshapes())
       self.current_frame = self.sub_frame1
     def display_a_frame(self):
       self.current_frame.pack_forget()
       self.sub_frame4.pack(fill="both", expand=True)
+      self.setup_agent.updateScreen(self.simulation_module.turtle_screen)
       self.current_frame = self.sub_frame4
     def display_e_frame(self):
       self.current_frame.pack_forget()
       self.sub_frame3.pack(fill="both", expand=True)
       self.current_frame = self.sub_frame3
     def display_l_frame(self):
-      self.agents_update()
+      self.setup_algorithm.updateUI()
       self.current_frame.pack_forget()
       self.sub_frame2.pack(fill="both", expand=True)
       self.current_frame = self.sub_frame2

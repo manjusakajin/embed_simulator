@@ -18,6 +18,13 @@ class SetupAgent():
     # self.behavior = "randomRun"
     self.agents = ["New Agent"]
     self.initUI(master)
+  def updateScreen(self, screen):
+    self._screen = screen
+    if self._screen != None:
+      shapes = ["New Shape"]
+      shapes += self._screen.getshapes()
+      self._subframe.shape_box.configure(values=shapes)
+
   def initUI(self, frame):
     frame.columnconfigure(0,weight=4)
     frame.columnconfigure(1,weight=1)
@@ -62,8 +69,16 @@ class SetupAgent():
     self._subframe.type_input.place(x=150, y=130)
     self._subframe.type_input.bind("<<ComboboxSelected>>", self.selectType)
     ##########################Shape Input##################################
-    shapes = self._screen.getshapes()
+    if self._screen != None:
+      shapes = self._screen.getshapes()
+    else:
+      shapes = []
     shapes.insert(0, "New Shape")
+    self._subframe.shape_add_button = Button(self._subframe, text="Add", command= lambda: self.createShape(self._subframe.shape_name_entry.get(), self._shape_image))
+    self._subframe.shape_name_label = Label(self._subframe, text="Shape Name:")
+    self._subframe.shape_name_entry = Entry(self._subframe)
+    self._subframe.shape_image_button = Button(self._subframe, text="Shape Image", command=self.inputImage)
+    self._subframe.shape_image = Label(self._subframe)
     self._subframe.shape_label = Label(self._subframe, text="Shape:")
     self._subframe.shape_box = ttk.Combobox(self._subframe, values=shapes)
     self._subframe.shape_box.bind("<<ComboboxSelected>>", self.selectShape)
@@ -71,6 +86,7 @@ class SetupAgent():
     self._subframe.shape_width.insert(0,"width")
     self._subframe.shape_height = Entry(self._subframe, width = 10)
     self._subframe.shape_height.insert(0,"height")
+    self._subframe.screen_err_label = Label(self._subframe, text="PLEASE SET UP SIMULATION SCREEN", fg="red")
     #############################Behavior Input############################
     # self._subframe.behavior_label = Label(self._subframe, text="Behavior:")
     # self._subframe.behavior_box = ttk.Combobox(self._subframe, values=Behavior.methods)
@@ -86,16 +102,7 @@ class SetupAgent():
     self._subframe.begin_heading_label = Label(self._subframe, text="Begin Heading:")
     self._subframe.begin_heading = Entry(self._subframe, width = 20)
     ############################ add method button ##########################
-    self.active_methods = ["New Method"]
-    self.active_scrollbar = Scrollbar(self._subframe)
-    self.active_list = Listbox(self._subframe, width = 60,
-      yscrollcommand=self.active_scrollbar.set, selectmode = "single")
-    self.active_list.bind('<<ListboxSelect>>', self.select_method)
-    for x in self.active_methods:
-      if x == "New Method":
-        self.active_list.insert("end", x)
-      else :
-        self.active_list.insert("end", x['name'])
+    self.active_method = Text(self._subframe, width = 60, height=10)
     ###########################custom env input####################################
     self.sensor_label = Label(self._subframe, text="Custom Variable:")
     self.sensor_textbox = Text(self._subframe, width = 40, height=10)
@@ -136,12 +143,8 @@ class SetupAgent():
       # self.custom_behavior = object.custom_behavior
     elif object.type == "Active" :
       self.showActiveAgentForm()
-      self.active_list.delete(0, "end")
-      for x in self.active_methods:
-        if x == "New Method":
-          self.active_list.insert("end", x)
-        else :
-          self.active_list.insert("end", x['name'])
+      self.active_method.delete("1.0", "end")
+      self.active_method.insert("end", object.method)
     elif object.type == "Sensor" :
       self.showSensorAgentForm()
       self.sensor_textbox.delete("1.0", "end")
@@ -170,18 +173,18 @@ class SetupAgent():
         self._list.insert("end", new.name)
     elif type == "Active":
       if name in self._list.get(0, len(self.agents)-1):
-        for i in self.agents:
-          if i!= "New Agent" and name == i.name  :
-            i.update(name, self.active_methods)
+        for j in self.agents:
+          if j!= "New Agent" and name == j.name  :
+            j.update(name, self.active_method.get("1.0","end"))
       else:
-        new = ActiveAgent(name, self.active_methods)
+        new = ActiveAgent(name, self.active_method.get("1.0","end"))
         self.agents.append(new)
         self._list.insert("end", new.name)
     elif type == "Sensor":
       if name in self._list.get(0, len(self.agents)-1):
-        for i in self.agents:
-          if i!= "New Agent" and name == i.name  :
-            i.update(name, self.sensor_textbox.get("1.0","end"))
+        for k in self.agents:
+          if k!= "New Agent" and name == k.name  :
+            k.update(name, self.sensor_textbox.get("1.0","end"))
       else:
         new = SensorAgent(name, self.sensor_textbox.get("1.0","end"))
         self.agents.append(new)
@@ -207,14 +210,12 @@ class SetupAgent():
       self._subframe.begin_pos_y.place(x=250, y=380)
       self._subframe.begin_heading_label.place(x=50, y=430)
       self._subframe.begin_heading.place(x=150, y=430)
-      Label(self._subframe, text="Shape Name:").place(x=80, y=200)
-      self._subframe.shape_name_entry = Entry(self._subframe)
+      self._subframe.shape_name_label.place(x=80, y=200)
       self._subframe.shape_name_entry.place(x=180, y=200)
-      Button(self._subframe, text="Shape Image", command=self.inputImage).place(x=150, y=250)
-      self._subframe.shape_image = Label(self._subframe)
+      self._subframe.shape_image_button.place(x=150, y=250)
       self._subframe.shape_width.place(x=300 ,y=250)
       self._subframe.shape_height.place(x=370 ,y=250)
-      Button(self._subframe, text="Add", command= lambda: self.createShape(self._subframe.shape_name_entry.get(), self._shape_image)).place(x=150, y=280)
+      self._subframe.shape_add_button.place(x=150, y=280)
   def inputImage(self):
     ftypes = [('Image files', '*.gif *.png *.jpeg'), ('All files', '*')]
     dlg = Open(self._master, filetypes = ftypes)
@@ -258,19 +259,24 @@ class SetupAgent():
       self.hideForm()
       self.showSensorAgentForm()
   def createDisplayAgentForm(self):
-    self._subframe.shape_label.place(x=50, y=160)
-    self._subframe.shape_box.place(x=150, y=160)
+    if self._screen != None:
+      self._subframe.shape_label.place(x=50, y=160)
+      self._subframe.shape_box.place(x=150, y=160)
+      self._subframe.begin_pos_label.place(x=50, y=250 )
+      self._subframe.begin_pos_x.place(x=150, y=250)
+      self._subframe.begin_pos_y.place(x=250, y=250)
+      self._subframe.begin_heading_label.place(x=50, y=300)
+      self._subframe.begin_heading.place(x=150, y=300)
+    else:
+      self._subframe.screen_err_label.place(x=50, y=160)
     # self._subframe.behavior_box.place(x=150, y=200)
     # self._subframe.behavior_label.place(x=50, y=200)
     # self._subframe.behavior_button.place(x=350,y=200)
-    self._subframe.begin_pos_label.place(x=50, y=250 )
-    self._subframe.begin_pos_x.place(x=150, y=250)
-    self._subframe.begin_pos_y.place(x=250, y=250)
-    self._subframe.begin_heading_label.place(x=50, y=300)
-    self._subframe.begin_heading.place(x=150, y=300)
   def hideForm(self):
+    self._subframe.screen_err_label.place_forget()
     self._subframe.shape_label.place_forget()
     self._subframe.shape_box.place_forget()
+    self.active_method.place_forget()
     # self._subframe.behavior_box.place_forget()
     # self._subframe.behavior_label.place_forget()
     # self._subframe.behavior_button.place_forget()
@@ -279,14 +285,18 @@ class SetupAgent():
     self._subframe.begin_pos_y.place_forget()
     self._subframe.begin_heading_label.place_forget()
     self._subframe.begin_heading.place_forget()
-    self.active_scrollbar.place_forget()
-    self.active_list.place_forget()
     self.sensor_label.place_forget()
     self.sensor_textbox.place_forget()
+    self._subframe.shape_name_label.place_forget()
+    self._subframe.shape_name_entry.place_forget()
+    self._subframe.shape_image_button.place_forget()
+    self._subframe.shape_image.place_forget()
+    self._subframe.shape_width.place_forget()
+    self._subframe.shape_height.place_forget()
+    self._subframe.shape_add_button.place_forget()
 
   def showActiveAgentForm(self):
-    self.active_scrollbar.place(x=550, y=160)
-    self.active_list.place(x=50, y=160)
+    self.active_method.place(x=50, y=160)
 
   def showSensorAgentForm(self):
     self.sensor_label.place(x=50, y= 160)
@@ -311,29 +321,29 @@ class SetupAgent():
   #   self.custom_behavior = code
   #   print(code)
   #   toplevel.destroy()
-  def select_method(self,event):
-    selected = self.active_list.curselection()
-    if selected :
-      index = selected[0]
-      if index == 0:
-        name = ''
-        code = ''
-      else:
-        name = self.active_methods[index]['name']
-        code = self.active_methods[index]['code']
-      top = Toplevel()
-      top.title("Create Method")
-      Label(top, text="Name:").grid(row=0, column=0)
-      name_box = Entry(top, width = 60)
-      name_box.grid(row=0, column=1)
-      name_box.insert("end",name)
-      code_box = Text(top, height = 20, width =60)
-      code_box.grid(row=1, column =0, columnspan=2)
-      code_box.insert("end",code)
-      Button(top, text = "Save", command= lambda: self.save_method(name_box.get(),
-        code_box.get("1.0","end"), top)).grid(row=2, column = 1)
-  def save_method(self, name, code, top):
-    new = {'name': name, 'code': code}
-    self.active_methods.append(new)
-    self.active_list.insert("end", new['name'])
-    top.destroy()
+  # def select_method(self,event):
+  #   selected = self.active_list.curselection()
+  #   if selected :
+  #     index = selected[0]
+  #     if index == 0:
+  #       name = ''
+  #       code = ''
+  #     else:
+  #       name = self.active_methods[index]['name']
+  #       code = self.active_methods[index]['code']
+  #     top = Toplevel()
+  #     top.title("Create Method")
+  #     Label(top, text="Name:").grid(row=0, column=0)
+  #     name_box = Entry(top, width = 60)
+  #     name_box.grid(row=0, column=1)
+  #     name_box.insert("end",name)
+  #     code_box = Text(top, height = 20, width =60)
+  #     code_box.grid(row=1, column =0, columnspan=2)
+  #     code_box.insert("end",code)
+  #     Button(top, text = "Save", command= lambda: self.save_method(name_box.get(),
+  #       code_box.get("1.0","end"), top)).grid(row=2, column = 1)
+  # def save_method(self, name, code, top):
+  #   new = {'name': name, 'code': code}
+  #   self.active_methods.append(new)
+  #   self.active_list.insert("end", new['name'])
+  #   top.destroy()

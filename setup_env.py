@@ -21,6 +21,7 @@ class SetupENV():
     self._height_entry = Entry(master)
     self._height_entry.insert(0,"height")
     self._master = master
+    self._screen = screen
     # self.screen = screen
     # self.object = Enviroment(screen)
     self.chance_bgcolor(frame=master)
@@ -31,19 +32,19 @@ class SetupENV():
   def chance_bgcolor(self, frame=None):
     Button(frame, text='Select Background Color', command=self._getColor).place(x=10,y=50)
     Button(frame, text='Select Background Picture', command=self._getPicture).place(x=10,y=100)
-    Label(frame, text='Setup Grid: ').place(x=10,y=150)
-    self._width_entry.place(x=50, y=180)
-    self._height_entry.place(x=50, y=210)
-    # Button(frame, text='Setup Map', command=self._getPicture).place(x=10,y=250)
-    Label(frame, text='Setup Variable:').place(x=10,y=300)
+    # Label(frame, text='Setup Grid: ').place(x=10,y=150)
+    # self._width_entry.place(x=50, y=180)
+    # self._height_entry.place(x=50, y=210)
+    # # Button(frame, text='Setup Map', command=self._getPicture).place(x=10,y=250)
+    # Label(frame, text='Setup Variable:').place(x=10,y=300)
     Button(frame, text='Set Up', command=self._setup).pack(side="bottom")
-    Label(frame, text='Name:').place(x=20,y=330)
-    var_name = Entry(self._master, width = 20)
-    var_name.place(x=100,y=330)
-    Label(frame, text='Default:').place(x=20,y=360)
-    default = Entry(self._master, width = 20)
-    default.place(x=100,y=360)
-    Button(frame, text='Add', command=lambda: self._add_variable(var_name.get(), default.get())).place(x=140,y=390)
+    # Label(frame, text='Name:').place(x=20,y=330)
+    # var_name = Entry(self._master, width = 20)
+    # var_name.place(x=100,y=330)
+    # Label(frame, text='Default:').place(x=20,y=360)
+    # default = Entry(self._master, width = 20)
+    # default.place(x=100,y=360)
+    # Button(frame, text='Add', command=lambda: self._add_variable(var_name.get(), default.get())).place(x=140,y=390)
 
   def _getColor(self):
     color = askcolor()
@@ -57,21 +58,21 @@ class SetupENV():
     ftypes = [('Image files', '*.gif *.png *.jpeg'), ('All files', '*')]
     dlg = Open(self._master, filetypes = ftypes)
     fl = dlg.show()
-    print(fl)
     if fl != '':
       img = Image.open(fl)
       img = img.resize((670,520), Image.ANTIALIAS)
-      img.save(fl)
-      self.bgpic = fl
+      self.bgpic = 'Image/'+fl.split('/')[-1]
+      img.save(self.bgpic)
       self._demo_turtle_screen.bgpic(self.bgpic)
 
   def _setup(self):
     width = self._width_entry.get()
     height = self._height_entry.get()
-    # if self.bgcolor:
-    #   self.object.setupbgcolor(self.bgcolor)
-    # if self.bgpic:
-    #   self.object.setupbgpic(self.bgpic)
+    if self.bgcolor:
+      self._screen.bgcolor(self.bgcolor)
+    if self.bgpic:
+      print(bgpic)
+      self._screen.bgpic(self.bgpic)
     if self._is_int(width) and self._is_int(height):
       self.width = int(width)
       self.height = int(height)
@@ -79,11 +80,9 @@ class SetupENV():
       self.width = 100
       self.height = 100
       # self.object.setupgrid(self.width, self.height)
-    self._demo_turtle_screen.mode(mode="world")
-    self._demo_turtle_screen.setworldcoordinates(0,0, self.width, self.height)
     self._pixel_width = 670/self.width
     self._pixel_height = 520/self.height
-    self._show_grid()
+    # self._show_grid()
   def _is_int(self, x):
     try:
         x = int(x)

@@ -1,14 +1,17 @@
-from tkinter import *
-from tkinter import ttk
+from turtle import *
+from PIL import Image
+import math
+from colormap import rgb2hex
 from compile import *
-window = Tk()
-window.title("Welcome to TutorialsPoint")
-window.geometry('400x400')
-window.configure(background = "grey");
-a1 = Text(window)
-a1.grid(row = 0,column = 1, rowspan=10,sticky="nwse")
-def check():
-  compile = Compile()
-  compile.setSrc(a1.get("1.0",END))
-btn = ttk.Button(window ,text="Submit", command=check).grid(row=4,column=0)
-window.mainloop()
+
+map = []
+im = Image.open('Image/map.png')
+rgpim = im.convert('RGB')
+width, height = im.size
+print(width, height)
+for y in range(height):
+  for x in range(width):
+    r,g,p = rgpim.getpixel((x,y))
+    map.append(rgb2hex(r, g, p))
+    print(rgb2hex(r, g, p),end="")
+  print("")

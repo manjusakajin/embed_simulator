@@ -3,62 +3,56 @@ from turtle import *
 import random
 from link_check import *
 from agent import *
+from compile import *
 
 class Controlmodule():
-  def __init__(self, env_module, agent_module, algorithm, screen=None):
-    self._screen = screen
-    self._env = env_module
+  def __init__(self, simulation, agent_module, algorithm):
+    self.simulation = simulation
     self._agentmodule = agent_module
     self.agents = []
-    self.sensors = []
-    self.actions = []
-    self.displays = []
-    self.decision = algorithm
-
+    self.algorithm = algorithm
   def setup(self):
-    if self._screen != None :
-      print("Hiển thị giao diện mô phỏng")
+    if self.simulation.turtle_display != None :
+      bgpic = self.simulation.turtle_screen.bgpic()
+      self.simulation.turtle_screen.clear()
+      if bgpic != 'nopic':
+        self.simulation.turtle_screen.bgpic(bgpic)
     ########## Lưu các agent của hệ thống
     for x in self._agentmodule.agents:
       if x!= "New Agent" :
         self.agents.append(x)
+    for x in self._agentmodule.agents:
+      if x!= "New Agent" :
         if x.type == "Display":
-          x.setup(self._screen) ##### action và sensor viết hàm setup sau
-    exec(self.decision.setup_code)
-
-  # def run_agent(self):
-  #   if self.agents:
-  #     for x in self.agents:
-  #       if x.status == True :
-  #         x.move()
-  #       else:
-  #         self.agents.remove(x)
-  #   # self._screen.ontimer(self.run_agent(),5)
-  # def check_link(self):
-  #   print('check')
-  #   for x in self.agents:
-  #     i = self.agents.index(x) + 1
-  #     j = len(self.agents) -1
-  #     for y in self.agents[i:j]:
-  #       for z in self._ass.links:
-  #         if z.agenttype1 == x.type and z.agenttype2 == y.type:
-  #           result = CheckLink(x,y)
-  #           result = result.check(z.checklink)
-  #           print(result)
-  #           if result == True:
-  #             if z.type1_action != '' and z.type1_action != None:
-  #               x.runmethod(z.type1_action)
-  #             if z.type2_action != '' and z.type1_action != None:
-  #               y.runmethod(z.type2_action)
-  #         elif z.agenttype2 == x.type and z.agenttype1 == y.type:
-  #           result = CheckLink(y,x)
-  #           result = result.check(z.checklink)
-  #           if result == True:
-  #             if z.type1_action != '' and z.type1_action != None:
-  #               y.runmethod(z.type1_action)
-  #             if z.type2_action != '' and z.type1_action != None:
-  #               x.runmethod(z.type2_action)
-  #   self._screen.ontimer(self.check_link(),10)
-  # def run(self):
-  #   while 1:
-  #     self.run_agent()
+          x.setup(self.simulation.turtle_screen) ##### action và sensor viết hàm setup sau
+          print("new turtle")
+          self.run_code_setup(x)
+          x.agents = x.sensors + x.actuators
+          x.compile = Compile(x.agents)
+  def run_code_setup(self, displayagent):
+    src = displayagent.setup_code.split('\n')
+    src.pop()
+    for x in src:
+      splited = x.split(' ')
+      print(splited)
+      if splited[0] != 'link' or len(splited) < 2:
+        print('syntax error')
+      else:
+        for y in self.agents:
+          if y.name == splited[1]:
+            if y.type == "Sensor":
+              displayagent.sensors.append(y)
+              y.link(displayagent)
+            elif y.type == "Active":
+              displayagent.actuators.append(y)
+              y.link(displayagent)
+            else :
+              print("Cannot connect " + y.name + " agent")
+  def run(self):
+    for x in self._agentmodule.agents:
+      if x!= "New Agent" :
+        if x.type == "Display":
+          x.run_loop()
+  def run_loop(self):
+    while 1:
+      self.run()

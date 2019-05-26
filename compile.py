@@ -53,7 +53,9 @@ class Compile():
               result += str(self.transToPython(token['value'][i+1]['value'], space +1))
               i+=2
       if token['type'] == 'call_method':
-        for y in token['value']:
+        result+= token['value'][0]['value']
+        result+= '.'
+        for y in token['value'][1:]:
           if y['type'] == 'params':
             result+='('
             for x in y['value']:
@@ -244,11 +246,15 @@ class Compile():
       self.current_index += 1
       content.append(self.check_expression())
       content.append(self.check_block())
+      while self.current_index < len(self.src) and self.src[self.current_index]['type'] == 'sb_newline':
+        self.current_index += 1
       while self.current_index < len(self.src) and self.src[self.current_index]['type'] == 'keyword_elif':
         content.append(self.src[self.current_index])
         self.current_index += 1
         content.append(self.check_expression())
         content.append(self.check_block())
+      while self.current_index < len(self.src) and self.src[self.current_index]['type'] == 'sb_newline':
+        self.current_index += 1
       if self.current_index < len(self.src) and self.src[self.current_index]['type'] == 'keyword_else':
         content.append(self.src[self.current_index])
         self.current_index += 1
@@ -265,7 +271,6 @@ class Compile():
     elif self.src[self.current_index]['type'] == 'indent':
       if self.current_index+1 < len(self.src) and self.src[self.current_index+1]['type'] == 'sb_point':
         content.append(self.src[self.current_index])
-        content.append(self.src[self.current_index+1])
         self.current_index += 2
         if self.current_index < len(self.src) and self.src[self.current_index]['type'] == 'keyword_method':
           content.append(self.src[self.current_index])
@@ -274,6 +279,12 @@ class Compile():
           return {'type': 'call_method', 'value': content}
         else:
           self.err.append("Not have method name")
+      elif self.current_index+1 < len(self.src) and self.src[self.current_index+1]['type'] == 'keyword_method':
+        content.append(self.src[self.current_index])
+        content.append(self.src[self.current_index+1])
+        self.current_index += 2
+        content.append(self.check_params())
+        return {'type': 'call_method', 'value': content}
       else :
         while self.current_index < len(self.src) and self.src[self.current_index]['type'] != 'sb_newline' and self.src[self.current_index]['type'] != 'sb_blockclose':
           content.append(self.src[self.current_index])
@@ -302,10 +313,14 @@ class Compile():
           break
       if self.current_index < len(self.src) and self.src[self.current_index]['type'] == 'sb_exclose':
         self.current_index += 1
-      else :
-        self.err.append("No have )")
     else :
-      self.err.append("No have (")
+      while self.current_index < len(self.src) and self.src[self.current_index]['type'] != 'sb_newline':
+        content.append(self.check_expression())
+        if self.current_index < len(self.src) and self.src[self.current_index]['type'] == 'sb_comma':
+          self.current_index += 1
+          continue
+        else:
+          break
     return {'type': 'params', 'value': content}
   def check_expression(self):
     content = []
@@ -351,15 +366,15 @@ class Compile():
     for x in tokens:
       if x['type'] == 'call_method':
         self.check_call_method_mean(x)
-        if self.get_params_amount(x) != var.params_amount[x['value'][2]['value']]:
-          self.err.append("Params amount is wrong. Must have " + str(var.params_amount[x['value'][2]['value']]) +' param' )
+        if self.get_params_amount(x) != var.params_amount[x['value'][1]['value']]:
+          self.err.append("Params amount is wrong. Must have " + str(var.params_amount[x['value'][1]['value']]) +' param' )
       elif x['type'] == 'if_clause' or x['type'] == 'while_clause':
-        if x['value'][2]['type'] == 'block':
-          self.check_meaning(x['value'][2]['value'])
+        if x['value'][1]['type'] == 'block':
+          self.check_meaning(x['value'][1]['value'])
 
   def get_params_amount(self, x):
-    if x['value'][3]['type'] == 'params':
-      return len(x['value'][3]['value'])
+    if x['value'][2]['type'] == 'params':
+      return len(x['value'][2]['value'])
     else:
       return -1
   def check_call_method_mean(self, x):
@@ -371,9 +386,9 @@ class Compile():
     else:
       return False
 #########################################################################################################
-agents = ['sensor1', 'actuator']
-compile = Compile(agents)
-src = "left = sensor1.getValue()\n if left != \"#F6F6F6\" {actuator.run()} elif left != \"#F6F6F6\" {actuator.run()}  "
-compile.setSrc(src)
-print(compile.transToPython(compile.syntax_tree['value'], 0))
-print(compile.err)
+# agents = ['sensor1', 'actuator']
+# compile = Compile(agents)
+# src = "left = sensor1.getValue()\n if left != \"#F6F6F6\" {actuator run \n} elif left != \"#F6F6F6\" {actuator run \n}  "
+# compile.setSrc(src)
+# print(compile.transToPython(compile.syntax_tree['value'], 0))
+# print(compile.err)

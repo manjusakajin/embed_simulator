@@ -57,8 +57,7 @@ class Application(tk.Frame):
       # self.code_button.pack(side="left")
       tk.Button(self.sub_frame1, text="Setup", command= self.control.setup).pack(side="left")
       tk.Button(self.sub_frame1, text="Run", command= self.control.run).pack(side="left")
-      tk.Button(self.sub_frame1, text="Run Loop", command= self.control.run_loop).pack(side="left")
-
+      tk.Button(self.sub_frame1, text="Run Loop", command= lambda: self.control.run_loop(True)).pack(side="left")
     def create_code_frame(self):
       self.read_code = tk.Button(self.sub_frame2, text="read", command=self.get_code)
       self.read_code.pack(side="top")

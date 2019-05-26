@@ -53,6 +53,6 @@ class Controlmodule():
       if x!= "New Agent" :
         if x.type == "Display":
           x.run_loop()
-  def run_loop(self):
-    while 1:
+  def run_loop(self, status):
+    while True:
       self.run()

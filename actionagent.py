@@ -12,7 +12,6 @@ class ActiveAgent():
   def update(self, name, method):
     self.name = name
     self.method = method
-
   def link(self, displayagent):
     self.displayagent = displayagent
   def run(self):

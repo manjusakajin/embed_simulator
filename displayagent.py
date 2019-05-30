@@ -83,15 +83,15 @@ class DisplayAgent():
     print([abs(x+335), abs(y-260)])
     return [abs(x+335), abs(y-260)]
 
-  def leftColor(self):
-    x,y = self.getLeft(30)
+  def leftColor(self, distance=30):
+    x,y = self.getLeft(distance)
     print('left:' +str(x) +','+str(y) )
     x,y = self.screencorToPicturecor(x,y)
     print(self.askColor(x,y))
     return self.askColor(x,y)
 
-  def rightColor(self):
-    x,y = self.getRight(30)
+  def rightColor(self, distance=30):
+    x,y = self.getRight(distance)
     print('right:' +str(x) +','+str(y) )
     x,y = self.screencorToPicturecor(x,y)
     print(self.askColor(x,y))
@@ -143,10 +143,10 @@ class DisplayAgent():
     print(self.compile.trans(self.loop_code))
     exec(self.compile.trans(self.loop_code))
 
-  def turnleft(self):
-    self.turtle.left(1)
-  def turnright(self):
-    self.turtle.right(1)
+  def turnleft(self, degree=1):
+    self.turtle.left(degree)
+  def turnright(self, degree=1):
+    self.turtle.right(degree)
   def forward(self):
     self.turtle.forward(1)
   def undo(self):

@@ -1,7 +1,5 @@
-from env import *
 from turtle import *
 import random
-from link_check import *
 from agent import *
 from compile import *
 

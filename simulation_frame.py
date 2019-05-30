@@ -28,10 +28,22 @@ class SimulationModule():
         self.turtle_display = tk.Canvas(self._master, width=670, height=520, background='white')
         self.turtle_display.pack()
         self.turtle_screen = turtle.TurtleScreen(self.turtle_display)
+        self.turtle = RawPen(self.turtle_screen)
+        self.turtle.shape("blank")
+        self.turtle.penup()
+        self.turtle.pensize(20)
         self.screen_edit_button = tk.Button(self._master, text="Edit", command=self.edit_screen)
         self.screen_edit_button.place(x=300, y=570)
         self.screen_delete_button = tk.Button(self._master, text="Delete", command=self.delete_screen)
         self.screen_delete_button.place(x=350, y=570)
+        # self.screen_paint_button = tk.Button(self._master, text="Paint", command=self.setup_paint)
+        # self.screen_paint_button.place(x=400, y=570)
+        # self.screen_stoppaint_button = tk.Button(self._master, text="Stop Paint", command=self.stop_paint)
+        # self.screen_stoppaint_button.place(x=450, y=570)
+        # self.screen_undo_button = tk.Button(self._master, text="Undo", command=self.turtle.undo)
+        # self.screen_undo_button.place(x=530, y=570)
+        # self.screen_undoall_button = tk.Button(self._master, text="Reset", command=self.reset)
+        # self.screen_undoall_button.place(x=580, y=570)
   def delete_screen(self):
     self.simulation_screen.place_forget()
     self.simulation_screen = None
@@ -44,3 +56,20 @@ class SimulationModule():
     top.title("Setup screen")
     top.geometry('1000x550')
     SetupENV(top, self.turtle_screen)
+  def reset(self):
+    self.turtle_screen.clear()
+    self.turtle = RawPen(self.turtle_screen)
+    self.turtle.shape("blank")
+    self.turtle.penup()
+    self.turtle.pensize(20)
+  def setup_paint(self):
+    self.turtle.shape("circle")
+    self.turtle_screen.onscreenclick(self.paint)
+  def stop_paint(self):
+    self.turtle.shape("blank")
+    self.turtle_screen.onscreenclick(None)
+  def paint(self,x,y):
+    self.turtle.penup()
+    self.turtle.setpos(x,y)
+    self.turtle.pendown()
+    self.turtle.ondrag(self.turtle.goto)

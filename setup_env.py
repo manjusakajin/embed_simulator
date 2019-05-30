@@ -1,9 +1,9 @@
 from PIL import Image
 from turtle import *
-from env import *
 from tkinter import Entry, Canvas, Button, Label, Listbox, Scrollbar
 from tkinter.colorchooser import *
 from tkinter.filedialog import Open
+import datetime
 
 class SetupENV():
   def __init__(self, master=None, screen = None):
@@ -24,14 +24,28 @@ class SetupENV():
     self._screen = screen
     # self.screen = screen
     # self.object = Enviroment(screen)
+    self.demo_screen = Canvas(master, width=670, height=520, background='white')
+    self.demo_screen.pack(side="right")
+    self._demo_turtle_screen = TurtleScreen(self.demo_screen)
+    self.turtle = RawPen(self._demo_turtle_screen)
+    self.turtle.shape("blank")
+    self.turtle.penup()
+    self.turtle.pensize(20)
     self.chance_bgcolor(frame=master)
-    demo_screen = Canvas(master, width=670, height=520, background='white')
-    demo_screen.pack(side="right")
-    self._demo_turtle_screen = TurtleScreen(demo_screen)
 
   def chance_bgcolor(self, frame=None):
     Button(frame, text='Select Background Color', command=self._getColor).place(x=10,y=50)
     Button(frame, text='Select Background Picture', command=self._getPicture).place(x=10,y=100)
+    self.screen_paint_button = Button(frame, text="Paint", command=self.setup_paint)
+    self.screen_paint_button.place(x=10, y=150)
+    self.pensize = Entry(frame)
+    self.pensize.place(x=150, y=150)
+    self.screen_stoppaint_button = Button(frame, text="Stop Paint", command=self.stop_paint)
+    self.screen_stoppaint_button.place(x=10, y=200)
+    self.screen_undo_button = Button(frame, text="Undo", command=self.turtle.undo)
+    self.screen_undo_button.place(x=10, y=250)
+    self.screen_undoall_button = Button(frame, text="Reset", command=self.reset)
+    self.screen_undoall_button.place(x=10, y=300)
     # Label(frame, text='Setup Grid: ').place(x=10,y=150)
     # self._width_entry.place(x=50, y=180)
     # self._height_entry.place(x=50, y=210)
@@ -46,6 +60,27 @@ class SetupENV():
     # default.place(x=100,y=360)
     # Button(frame, text='Add', command=lambda: self._add_variable(var_name.get(), default.get())).place(x=140,y=390)
 
+  def reset(self):
+    self._demo_turtle_screen.clear()
+    self.turtle = RawPen(self._demo_turtle_screen)
+    self.turtle.shape("blank")
+    self.turtle.penup()
+    self.turtle.pensize(20)
+  def setup_paint(self):
+    self.turtle.shape("circle")
+    if self.pensize.get() == '':
+      self.turtle.pensize(20)
+    else:
+      self.turtle.pensize(int(self.pensize.get()))
+    self._demo_turtle_screen.onscreenclick(self.paint)
+  def paint(self,x,y):
+    self.turtle.penup()
+    self.turtle.setpos(x,y)
+    self.turtle.pendown()
+    self.turtle.ondrag(self.turtle.goto)
+  def stop_paint(self):
+    self.turtle.shape("blank")
+    self._demo_turtle_screen.onscreenclick(None)
   def _getColor(self):
     color = askcolor()
     self._demo_turtle_screen.bgcolor(color[1])
@@ -82,6 +117,12 @@ class SetupENV():
       # self.object.setupgrid(self.width, self.height)
     self._pixel_width = 670/self.width
     self._pixel_height = 520/self.height
+    image_name = 'Image/'+ str(datetime.datetime.now())
+    self.demo_screen.postscript(file=image_name+'.eps')
+    img = Image.open(image_name+'.eps')
+    img = img.resize((670,520), Image.ANTIALIAS)
+    img.save(image_name+'.png')
+    self._screen.bgpic(image_name+'.png')
     # self._show_grid()
   def _is_int(self, x):
     try:

@@ -8,6 +8,7 @@ class Compile():
   def setSrc(self, srcCode=None):
     self.src = self.cutSrc(srcCode)
     self.current_index = 0
+    print(self.src)
     self.syntax_tree = self.check_syntax()
     print(self.syntax_tree)
     self.check_meaning(self.syntax_tree['value'])
@@ -148,7 +149,7 @@ class Compile():
         i = 1
         while i< len(command) and command[i] != '\"':
           i+=1
-        status = i + 2
+        status = i + 1
         tokens.append({'type': 'string', 'value': '\"'+command[1:i]+'\"'})
       elif command[0] == '>':
         if command[1] == '=':
@@ -196,13 +197,13 @@ class Compile():
         status = 1
       elif command[0].isdigit():
         i = 0
-        while(i<len(command) and command[i].isdigit()):
+        while(i<len(command) and command[i] in ['0','1','2','3','4','5','6','7','8','9']):
           i+=1
         status = i
         if i == 1:
           tokens.append({'type': 'number', 'value': int(command[0])})
         else :
-          tokens.append({'type': 'number', 'value': int(command[0:i-1])})
+          tokens.append({'type': 'number', 'value': int(command[0:i])})
       else:
         i = 0
         while(i<len(command) and (command[i].isalpha() or command[i].isdigit())):
@@ -245,6 +246,8 @@ class Compile():
       content.append(self.src[self.current_index])
       self.current_index += 1
       content.append(self.check_expression())
+      while self.current_index < len(self.src) and self.src[self.current_index]['type'] == 'sb_newline':
+        self.current_index += 1
       content.append(self.check_block())
       while self.current_index < len(self.src) and self.src[self.current_index]['type'] == 'sb_newline':
         self.current_index += 1
@@ -366,7 +369,7 @@ class Compile():
     for x in tokens:
       if x['type'] == 'call_method':
         self.check_call_method_mean(x)
-        if self.get_params_amount(x) != var.params_amount[x['value'][1]['value']]:
+        if self.get_params_amount(x) < var.params_amount[x['value'][1]['value']]:
           self.err.append("Params amount is wrong. Must have " + str(var.params_amount[x['value'][1]['value']]) +' param' )
       elif x['type'] == 'if_clause' or x['type'] == 'while_clause':
         if x['value'][1]['type'] == 'block':
@@ -386,9 +389,9 @@ class Compile():
     else:
       return False
 #########################################################################################################
-# agents = ['sensor1', 'actuator']
-# compile = Compile(agents)
-# src = "left = sensor1.getValue()\n if left != \"#F6F6F6\" {actuator run \n} elif left != \"#F6F6F6\" {actuator run \n}  "
-# compile.setSrc(src)
-# print(compile.transToPython(compile.syntax_tree['value'], 0))
-# print(compile.err)
+agents = ['sensor1', 'actuator']
+compile = Compile(agents)
+src = " left = sensor1.getValue()\nright = sensor2.getValue()\nprev = \"thang\" \nif left == \"#FFFFFF\" and right == \"#FFFFFF\"\n{\nactuator.run()\nprev = \"thang\"}"
+compile.setSrc(src)
+print(compile.transToPython(compile.syntax_tree['value'], 0))
+print(compile.err)
